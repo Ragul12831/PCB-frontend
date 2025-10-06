@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { io } from "socket.io-client";
+
+const SOCKET_URL = "http://localhost:5000";
 
 const PCBViewerApp = () => {
   const [filePath, setFilePath] = useState('');
@@ -7,6 +10,31 @@ const PCBViewerApp = () => {
   const [pcbData, setPcbData] = useState(null);
   const [showViewer, setShowViewer] = useState(false);
   const [showPathModal, setShowPathModal] = useState(false);
+  const [socket, setSocket] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [pcbFile, setPcbFile] = useState(null);
+
+  useEffect(() => {
+    const newSocket = io(SOCKET_URL);
+    setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log("Connected to WebSocket server");
+    });
+
+    newSocket.on("message", (data) => {
+      console.log("Message from server:", data.msg);
+      setMessages((prev) => [...prev, data.msg]);
+    });
+
+    newSocket.on("pcb_loaded", (data) => {
+      console.log("PCB loaded:", data);
+      setPcbFile(data.url); // store PCB file URL
+      setMessages((prev) => [...prev, `PCB loaded: ${data.filename}`]);
+    });
+
+    return () => newSocket.disconnect();
+  }, []);
 
   // Load saved path from memory on component mount
   useEffect(() => {
