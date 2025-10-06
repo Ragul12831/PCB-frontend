@@ -1,10 +1,10 @@
 import './App.css';
-import PCBViewerApp from './pcb';
+import KiCadPCBViewer from './Kicad_pcb';
 
 function App() {
   return (
     <div className="App">
-      <PCBViewerApp/>
+      <KiCadPCBViewer/>
     </div>
   );
 }
